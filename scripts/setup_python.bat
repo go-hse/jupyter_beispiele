@@ -13,14 +13,14 @@ set PARENT=%~dp0
 cd /D %PARENT%
 
 :: Current User PATH
-set ORGPATH=%PATH%
+set "ORGPATH=%PATH%"
 
 :: DEFAULT WINDOWS-PATH
 set PATH=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\
 
 call :FindProgram git.exe :InstallGit GIT_PATH
 call :FindProgram code.exe :InstallCode CODE_PATH
-call :InstallPython
+call :InstallPython 
 
 %comspec% /K title %PARENT%
 
@@ -158,35 +158,27 @@ echo print^('Hello World!'^) > Sources\01_hello_world.py
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: GET JUPYTERS BY HTTPS
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-git clone https://github.com/go-hse/python_introduction.git
+
+set REPO=python_introduction
+git clone https://github.com/go-hse/%REPO%.git
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Write SCRIPTS
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+(
+echo c = get_config^(^)  #noqa
+echo c.ServerApp.ip = '127.0.0.1'
+) > %PARENT%jupyter_notebook_config.py
+
 
 (
 echo @echo off
-echo set ^"PATH=%PATH%^"
-echo start jupyter notebook jupyter_beispiele
-echo start ^"Python-Umgebung in %PARENT%^" %comspec% /K
+echo set "PATH=%PATH%"
+echo set "JUPYTER_CONFIG_DIR=%PARENT%"
+echo start jupyter notebook %REPO%\notebooks\00_Uebersicht.ipynb
+echo start code Sources
+echo start "Python-Umgebung in %PARENT%" %comspec% /K
 ) > %PARENT%start_python.bat
-
-
-(
-echo @echo off
-echo setx ^"PATH=%PATH%^"
-echo echo set PATH permanent
-echo pause
-) > %PARENT%permanent_path.bat
-
-(
-echo @echo off
-echo setx ^"PATH=%ORGPATH%^"
-echo echo restored OLD PATH
-echo pause
-) > %PARENT%restore_path.bat
-
-
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: START
