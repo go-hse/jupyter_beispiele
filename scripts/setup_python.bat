@@ -11,6 +11,11 @@ set PY_SHORT=312
 :: Save current directory
 set PARENT=%~dp0
 cd /D %PARENT%
+
+:: Current User PATH
+set ORGPATH=%PATH%
+
+:: DEFAULT WINDOWS-PATH
 set PATH=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\
 
 call :FindProgram git.exe :InstallGit GIT_PATH
@@ -19,6 +24,7 @@ call :InstallPython
 
 %comspec% /K title %PARENT%
 
+:: FINISH Goto End-Of-File
 GOTO :eof
 
 
@@ -92,7 +98,6 @@ set GIT_ZIP=MinGit-%GIT_VERSION%-64-bit.zip
 set DOWNLOAD="https://github.com/git-for-windows/git/releases/download/v%GIT_VERSION%.windows.1/%GIT_ZIP%"
 set GIT_PATH=%PARENT%Git.%GIT_VERSION%
 
-:: https://github.com/git-for-windows/git/wiki/Silent-or-Unattended-Installation
 if exist %GIT_ZIP% (
     echo ZIP %GIT_ZIP% exists
 ) else (
@@ -118,7 +123,7 @@ if exist %PY_ZIP% (
 )
 
 set STDPATH=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\
-set "PATH=%STDPATH%;%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%CODE_PATH%;%GIT_PATH%\cmd;%DENO_PATH%"
+set "PATH=%STDPATH%;%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%CODE_PATH%;%GIT_PATH%\cmd"
 
 set LOADER=get-pip.py
 if exist %LOADER% (
@@ -137,10 +142,15 @@ echo Lib\site-packages
 
 pip install virtualenv
 
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: install jupyter-notebook-extesions from
 :: https://jupyter.org/install
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 pip install notebook
 
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create and fill Sources Dir
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cd /D %PARENT%
 mkdir Sources
 echo print^('Hello World!'^) > Sources\01_hello_world.py
@@ -148,10 +158,10 @@ echo print^('Hello World!'^) > Sources\01_hello_world.py
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: GET JUPYTERS BY HTTPS
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-git clone https://github.com/go-hse/jupyter_beispiele.git
+git clone https://github.com/go-hse/python_introduction.git
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Write START SCRIPT
+:: Write SCRIPTS
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 (
@@ -160,6 +170,23 @@ echo set ^"PATH=%PATH%^"
 echo start jupyter notebook jupyter_beispiele
 echo start ^"Python-Umgebung in %PARENT%^" %comspec% /K
 ) > %PARENT%start_python.bat
+
+
+(
+echo @echo off
+echo setx ^"PATH=%PATH%^"
+echo echo set PATH permanent
+echo pause
+) > %PARENT%permanent_path.bat
+
+(
+echo @echo off
+echo setx ^"PATH=%ORGPATH%^"
+echo echo restored OLD PATH
+echo pause
+) > %PARENT%restore_path.bat
+
+
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: START
