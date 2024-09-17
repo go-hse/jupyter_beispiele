@@ -8,8 +8,12 @@ set GIT_VERSION=2.46.0
 set PY_VERSION=3.12.5
 set PY_SHORT=312
 
+set SCRIPTDIR=%~dp0
 :: Save current directory
-set PARENT=%~dp0
+set PARENT=%CD%
+echo PARENT: %PARENT%
+pause
+
 cd /D %PARENT%
 
 :: Current User PATH
@@ -67,13 +71,13 @@ exit /b
 
 set DOWNLOAD="https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-archive"
 set CODE_ZIP=code.zip
-set CODE_PATH=%PARENT%Code
+set CODE_PATH=%PARENT%\Code
 
 if exist %CODE_ZIP% (
     echo ZIP %CODE_ZIP% exists
 ) else (
     curl -A "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64)" -L %DOWNLOAD% -o %CODE_ZIP%
-    powershell -command "Expand-Archive -Force '%PARENT%%CODE_ZIP%' -DestinationPath '%CODE_PATH%'"
+    powershell -command "Expand-Archive -Force '%PARENT%\%CODE_ZIP%' -DestinationPath '%CODE_PATH%'"
 )
 
 if exist %CODE_PATH%\data (
@@ -96,13 +100,13 @@ exit /b
 set GIT_ZIP=MinGit-%GIT_VERSION%-64-bit.zip
 
 set DOWNLOAD="https://github.com/git-for-windows/git/releases/download/v%GIT_VERSION%.windows.1/%GIT_ZIP%"
-set GIT_PATH=%PARENT%Git.%GIT_VERSION%
+set GIT_PATH=%PARENT%\Git.%GIT_VERSION%
 
 if exist %GIT_ZIP% (
     echo ZIP %GIT_ZIP% exists
 ) else (
     curl -A "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64)" -L %DOWNLOAD% -o %GIT_ZIP%
-    powershell -command "Expand-Archive -Force '%PARENT%%GIT_ZIP%' -DestinationPath '%GIT_PATH%'"
+    powershell -command "Expand-Archive -Force '%PARENT%\%GIT_ZIP%' -DestinationPath '%GIT_PATH%'"
 )
 exit /b
 
@@ -113,13 +117,13 @@ exit /b
 
 set PY_ZIP=python-%PY_VERSION%-embed-amd64.zip
 set DOWNLOAD="https://www.python.org/ftp/python/%PY_VERSION%/%PY_ZIP%"
-set PYTHON_PATH=%PARENT%Python.%PY_VERSION%
+set PYTHON_PATH=%PARENT%\Python.%PY_VERSION%
 
 if exist %PY_ZIP% (
     echo ZIP %PY_ZIP% exists
 ) else (
     curl -A "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64)" -L %DOWNLOAD% -o %PY_ZIP%
-    powershell -command "Expand-Archive -Force '%PARENT%%PY_ZIP%' -DestinationPath '%PYTHON_PATH%'"
+    powershell -command "Expand-Archive -Force '%PARENT%\%PY_ZIP%' -DestinationPath '%PYTHON_PATH%'"
 )
 
 set STDPATH=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\
@@ -143,10 +147,10 @@ echo Lib\site-packages
 pip install virtualenv
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: install jupyter-notebook-extesions from
+:: install modules
 :: https://jupyter.org/install
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-pip install notebook
+pip install notebook matplotlib pandas PyQt5
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create and fill Sources Dir
@@ -168,7 +172,7 @@ git clone https://github.com/go-hse/%REPO%.git
 (
 echo c = get_config^(^)  #noqa
 echo c.ServerApp.ip = '127.0.0.1'
-) > %PARENT%jupyter_notebook_config.py
+) > %PARENT%\jupyter_notebook_config.py
 
 
 (
@@ -178,7 +182,7 @@ echo set "JUPYTER_CONFIG_DIR=%PARENT%"
 echo start jupyter notebook %REPO%\notebooks\00_Uebersicht.ipynb
 echo start code Sources
 echo start "Python-Umgebung in %PARENT%" %comspec% /K
-) > %PARENT%start_python.bat
+) > %PARENT%\start_python.bat
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: START
