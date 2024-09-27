@@ -7,12 +7,12 @@
 set GIT_VERSION=2.46.0
 set PY_VERSION=3.12.5
 set PY_SHORT=312
+set DENO_VERSION=v1.46.3
 
 set SCRIPTDIR=%~dp0
 :: Save current directory
 set PARENT=%CD%
 echo PARENT: %PARENT%
-pause
 
 cd /D %PARENT%
 
@@ -24,6 +24,7 @@ set PATH=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMRO
 
 call :FindProgram git.exe :InstallGit GIT_PATH
 call :FindProgram code.exe :InstallCode CODE_PATH
+call :FindProgram deno.exe :InstallDeno DENO_PATH
 call :InstallPython 
 
 %comspec% /K title %PARENT%
@@ -65,6 +66,27 @@ exit /b
 
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Deno
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:InstallDeno
+
+set TARGET=x86_64-pc-windows-msvc
+
+set DOWNLOAD="https://dl.deno.land/release/%DENO_VERSION%/deno-%TARGET%.zip"
+set DENO_ZIP=code.zip
+set DENO_PATH=%PARENT%\Deno.%DENO_VERSION%
+
+if exist %DENO_PATH%\ (
+    echo Deno %DENO_PATH% exists
+) else (
+    curl -A "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64)" -L %DOWNLOAD% -o %DENO_ZIP%
+    powershell -command "Expand-Archive -Force '%PARENT%\%DENO_ZIP%' -DestinationPath '%DENO_PATH%'"
+)
+
+exit /b
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: VS CODE
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :InstallCode
@@ -73,8 +95,8 @@ set DOWNLOAD="https://code.visualstudio.com/sha/download?build=stable&os=win32-x
 set CODE_ZIP=code.zip
 set CODE_PATH=%PARENT%\Code
 
-if exist %CODE_ZIP% (
-    echo ZIP %CODE_ZIP% exists
+if exist %CODE_PATH%\ (
+    echo ZIP %CODE_PATH% exists
 ) else (
     curl -A "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64)" -L %DOWNLOAD% -o %CODE_ZIP%
     powershell -command "Expand-Archive -Force '%PARENT%\%CODE_ZIP%' -DestinationPath '%CODE_PATH%'"
@@ -102,8 +124,8 @@ set GIT_ZIP=MinGit-%GIT_VERSION%-64-bit.zip
 set DOWNLOAD="https://github.com/git-for-windows/git/releases/download/v%GIT_VERSION%.windows.1/%GIT_ZIP%"
 set GIT_PATH=%PARENT%\Git.%GIT_VERSION%
 
-if exist %GIT_ZIP% (
-    echo ZIP %GIT_ZIP% exists
+if exist %GIT_PATH% (
+    echo Git %GIT_PATH% exists
 ) else (
     curl -A "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64)" -L %DOWNLOAD% -o %GIT_ZIP%
     powershell -command "Expand-Archive -Force '%PARENT%\%GIT_ZIP%' -DestinationPath '%GIT_PATH%'"
@@ -119,15 +141,15 @@ set PY_ZIP=python-%PY_VERSION%-embed-amd64.zip
 set DOWNLOAD="https://www.python.org/ftp/python/%PY_VERSION%/%PY_ZIP%"
 set PYTHON_PATH=%PARENT%\Python.%PY_VERSION%
 
-if exist %PY_ZIP% (
-    echo ZIP %PY_ZIP% exists
+if exist %PYTHON_PATH% (
+    echo ZIP %PYTHON_PATH% exists
 ) else (
     curl -A "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64)" -L %DOWNLOAD% -o %PY_ZIP%
     powershell -command "Expand-Archive -Force '%PARENT%\%PY_ZIP%' -DestinationPath '%PYTHON_PATH%'"
 )
 
 set STDPATH=%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\
-set "PATH=%STDPATH%;%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%CODE_PATH%;%GIT_PATH%\cmd"
+set "PATH=%STDPATH%;%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%CODE_PATH%;%GIT_PATH%\cmd;%DENO_PATH%"
 
 set LOADER=get-pip.py
 if exist %LOADER% (
@@ -174,12 +196,13 @@ echo c = get_config^(^)  #noqa
 echo c.ServerApp.ip = '127.0.0.1'
 ) > %PARENT%\jupyter_notebook_config.py
 
+deno jupyter --install 
 
 (
 echo @echo off
 echo set "PATH=%PATH%"
 echo set "JUPYTER_CONFIG_DIR=%PARENT%"
-echo start jupyter notebook %REPO%\notebooks\00_Uebersicht.ipynb
+echo start jupyter notebook %REPO%\python_notebooks\00_Uebersicht.ipynb
 echo start code Sources
 echo start "Python-Umgebung in %PARENT%" %comspec% /K
 ) > %PARENT%\start_python.bat
