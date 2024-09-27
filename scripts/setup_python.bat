@@ -202,7 +202,7 @@ deno jupyter --install
 echo @echo off
 echo set "PATH=%PATH%"
 echo set "JUPYTER_CONFIG_DIR=%PARENT%"
-echo start jupyter notebook %REPO%\python_notebooks\00_Uebersicht.ipynb
+echo start jupyter notebook %REPO%\notebooks
 echo start code Sources
 echo start "Python-Umgebung in %PARENT%" %comspec% /K
 ) > %PARENT%\start_python.bat
